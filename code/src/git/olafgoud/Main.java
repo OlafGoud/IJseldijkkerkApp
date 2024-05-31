@@ -1,5 +1,6 @@
 package git.olafgoud;
 
+import git.olafgoud.graphics.ChatChannel;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -34,12 +35,14 @@ public class Main extends Application {
 		this.stage = setupStage;
 		FlowPane root = new FlowPane(10, 10);
 		root.setPadding(new Insets(10));
-		Button btn1 = new Button("open");
+		Button btn1 = new Button("Chat");
 		btn1.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent arg) {
-				System.out.println("btn1");
+				ChatChannel channel = new ChatChannel(stage);
+				channel.ChatScreen();
+				stage = channel.getStage();
 				
 			}
 			
@@ -63,16 +66,28 @@ public class Main extends Application {
 			}
 			
 		});
+		
+		
 		HBox hbox = new HBox(10);
-		hbox.getChildren().addAll(btn1, btn2, btn3);
+		hbox.getChildren().addAll(btn1, btn2, btn3 );
 		root.getChildren().add(hbox);
+		root.setMinWidth(400);
 		
 		
-		
-		Scene scene = new Scene(root, 500, 400);
+		Scene scene = new Scene(root, 500, 700);
 		stage.setScene(scene);
 		stage.show();
 
+	}
+	
+	
+	public Stage getStage() {
+		return this.stage;
+	}
+	
+	
+	public void setStage(Stage stage) {
+		this.stage = stage;
 	}
 
 }
