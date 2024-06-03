@@ -52,18 +52,11 @@ public class ChatChannel {
 			String inputLine;
 			StringBuffer content = new StringBuffer();
 			while ((inputLine = in.readLine()) != null) {
-				if (inputLine.startsWith("[") || inputLine.startsWith("]")) {
-					inputLine = inputLine.replace("[", "{");
-					inputLine = inputLine.replace("]", "}");
-					System.out.println("asfd");
-				}
+				
 				content.append(inputLine);
-			}
-			System.out.println(content.toString());
+			}			
 			
-			
-			
-			JSONObject json = new JSONObject(content.toString());
+			JSONObject json = new JSONObject(("{\"text\":" + content.toString() + "}"));
 			
 			System.out.println(json.toString());
 			
@@ -138,6 +131,7 @@ public class ChatChannel {
 			}
 			
 		});		
+		label.setBorder(textBorder);
 		
 		root.add(backButton, 0, 0);
 		GridPane.setColumnSpan(backButton, 2);
@@ -149,7 +143,6 @@ public class ChatChannel {
 		
 		
 		
-		root.setGridLinesVisible(true);
 		
 		
 		root.getChildren().add(pane);
