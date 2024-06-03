@@ -1,11 +1,18 @@
 package git.olafgoud.graphics;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.json.JSONObject;
+
+import git.olafgoud.Main;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,48 +23,79 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class ChatChannel {
 	
 	public Stage stage;
+	public Main main;
 	
-	public ChatChannel(Stage mainStage) {
+	
+	public ChatChannel(Stage mainStage, Main main) {
 		this.stage = mainStage;
+		this.main = main;
 
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void ChatScreen() {
 		//borders
 		Border textBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-
+		URL url;
+		try {
+			url = new URL("http://127.0.0.1:5000/api/chats?chat=mainchat");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("GET");
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer content = new StringBuffer();
+			while ((inputLine = in.readLine()) != null) {
+				if (inputLine.startsWith("[") || inputLine.startsWith("]")) {
+					inputLine = inputLine.replace("[", "{");
+					inputLine = inputLine.replace("]", "}");
+					System.out.println("asfd");
+				}
+				content.append(inputLine);
+			}
+			System.out.println(content.toString());
+			
+			
+			
+			JSONObject json = new JSONObject(content.toString());
+			
+			System.out.println(json.toString());
+			
+			
+			
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		
+		
 		
 		//objects
-		FlowPane root = new FlowPane(10, 10);
+		GridPane root = new GridPane(10, 10);
 		root.setPadding(new Insets(10));
 		
+		GridPane pane = new GridPane();
 		
-		//chatscreen
+		//text
+		Label label = new Label();
 		
-		VBox chatScreen = new VBox(5);
-		chatScreen.setBorder(textBorder);
-
-		Label text1 = new Label("dasf");
-		Label text2 = new Label("ädsf");
 		
-		text1.setBorder(textBorder);
-		text2.setBorder(textBorder);
+		ColumnConstraints col = new ColumnConstraints();
+        col.setPercentWidth( 20 );
+        pane.getColumnConstraints().addAll(col, col, col, col, col );
+	
 		
-		chatScreen.getChildren().addAll(text1, text2);
 		
 		//chatinput
 		TextField chatBar = new TextField();
-		chatBar.lengthProperty().add(20);
 
 		Button sendButton = new Button("send");
 		sendButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -65,40 +103,56 @@ public class ChatChannel {
 			@Override
 			public void handle(ActionEvent arg) {
 				System.out.println(chatBar.getText());
+				String message = chatBar.getText();
+				if (message == "") {
+					return;
+				}
+				try {
+					URL url = new URL("http://127.0.0.1:5000/get-user/" + chatBar.getText());
+					
+					HttpURLConnection con = (HttpURLConnection) url.openConnection();
+					con.setRequestMethod("GET");
+					con.getInputStream();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+			
+		});
+		Button backButton = new Button("back");
+		backButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg) {
+				System.out.println(false);
+
+				MainScreen mainn = new MainScreen(stage, main);
+				mainn.mainScreen();
+				
+				stage = mainn.getStage();
+				
 				
 			}
 			
 		});		
 		
-		//gridpane
-		GridPane gridPane = new GridPane();
-		gridPane.setPadding(new Insets(30));
-		gridPane.setVgap(10);
-		gridPane.setHgap(15);
-		gridPane.setBorder(textBorder);
-		
-		
-		VBox.setVgrow(gridPane, Priority.ALWAYS);
-		
-		gridPane.add(chatScreen, 0, 0);
-		gridPane.add(chatBar, 0, 21);
-		gridPane.add(sendButton, 2, 21);
-		gridPane.setConstraints(chatBar, 0, 0, 2, 1, HPos.LEFT, VPos.TOP, Priority.SOMETIMES, Priority.ALWAYS);
-		gridPane.setConstraints(chatScreen, 0, 0, 2, 20, HPos.LEFT, VPos.TOP, Priority.SOMETIMES, Priority.ALWAYS);
-		
-		gridPane.setGridLinesVisible(true);
+		root.add(backButton, 0, 0);
+		GridPane.setColumnSpan(backButton, 2);
+		root.add(label, 0, 1);
+		root.add(chatBar, 0, 21);
+		GridPane.setColumnSpan(chatBar, 3);
+		GridPane.setRowSpan(label, 20);
+		root.add(sendButton, 4, 21);
 		
 		
 		
+		root.setGridLinesVisible(true);
 		
 		
-		
-		
-		
-		
-		
-		
-		root.getChildren().add(gridPane);
+		root.getChildren().add(pane);
 		root.setAlignment(Pos.BASELINE_CENTER);
 		
 		Scene scene = new Scene(root, 500, 700);
